@@ -11,19 +11,28 @@ import {
 } from 'remotion';
 import { loadFont as loadAmiri } from '@remotion/google-fonts/Amiri';
 import { loadFont as loadManrope } from '@remotion/google-fonts/Manrope';
+import { loadFont as loadAlegreya } from '@remotion/google-fonts/Alegreya';
 
 const amiri = loadAmiri().fontFamily;
 const manrope = loadManrope().fontFamily;
+const alegreya = loadAlegreya().fontFamily;
 
+// палитра «узбекская миниатюра» (по референсу: небо, пергамент, парча, купола)
 const C = {
-  cream: '#F7F3E8',
-  paper: '#FFFFFF',
-  green: '#1F4D3A',
-  olive: '#6B7A4F',
-  ochre: '#C98A2D',
-  ink: '#2A2A24',
-  muted: '#7C7A6E',
-  line: '#E4DFCE',
+  cream: '#F2E7CE',   // светлый «пергаментный» текст на небе
+  paper: '#F5EBD3',   // карточки-пергамент
+  green: '#2E4A8F',   // главный акцент — глубокая синь халатов
+  olive: '#8A5A2B',   // бронза рамок
+  ochre: '#C9872F',   // охра
+  ink: '#3A3328',
+  muted: '#6E6652',
+  line: '#D9C9A3',
+  gold: '#D9A441',
+  terra: '#B3543E',
+  teal: '#4C9FA6',
+  wall: '#C9A24B',
+  sky1: '#97A4B8',
+  sky2: '#AEB9C9',
 };
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' };
@@ -39,18 +48,77 @@ const slide = (f, fps, start) =>
 
 // ---------- общие элементы ----------
 
+const Swirl = ({ x, y, s = 1, flip = false }) => (
+  <g transform={`translate(${x},${y}) scale(${flip ? -s : s},${s})`} fill="none"
+     stroke="#7E8CA3" strokeWidth={6} strokeLinecap="round" opacity={0.55}>
+    <path d="M0,0 q34,-44 82,-26 q46,18 20,52 q-22,28 -56,12 q-26,-14 -8,-36 q14,-16 30,-4" />
+    <path d="M110,14 q40,-18 72,2" />
+  </g>
+);
+
+const Tuft = ({ x, y, ph }) => {
+  const f = useCurrentFrame();
+  const sway = 3 * Math.sin((f + ph) / 26);
+  return (
+    <g transform={`translate(${x},${y}) rotate(${sway})`} fill="none"
+       stroke="#7A4A35" strokeWidth={5} strokeLinecap="round" opacity={0.8}>
+      <path d="M0,0 q-16,-26 -30,-32" />
+      <path d="M0,0 q0,-34 -6,-48" />
+      <path d="M0,0 q14,-24 30,-30" />
+      <path d="M0,0 q22,-10 34,-8" />
+      <path d="M0,0 q-24,-8 -36,-4" />
+    </g>
+  );
+};
+
+const Dome = ({ x, w, h, color }) => (
+  <g>
+    <path d={`M${x - w / 2},0 q0,${-h} ${w / 2},${-h} q${w / 2},0 ${w / 2},${h} Z`}
+          fill={color} stroke="#8A5A2B" strokeWidth={3} />
+    <line x1={x} y1={-h - 16} x2={x} y2={-h} stroke="#8A5A2B" strokeWidth={4} />
+  </g>
+);
+
 const Bg = () => {
   const f = useCurrentFrame();
+  const drift = Math.sin(f / 150) * 26;
   return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: C.cream,
-        backgroundImage: `
-          radial-gradient(640px at ${22 + 9 * Math.sin(f / 95)}% ${14 + 5 * Math.cos(f / 120)}%, rgba(107,122,79,0.16), transparent 70%),
-          radial-gradient(760px at ${84 - 8 * Math.cos(f / 105)}% ${82 + 5 * Math.sin(f / 85)}%, rgba(201,138,45,0.14), transparent 70%)
-        `,
-      }}
-    />
+    <AbsoluteFill style={{ background: `linear-gradient(180deg, ${C.sky1}, ${C.sky2} 70%, #A3AEBE)` }}>
+      <svg width="1080" height="1920" style={{ position: 'absolute', inset: 0 }}>
+        {/* облака-завитки, плывут двумя ярусами */}
+        <g transform={`translate(${drift},0)`}>
+          <Swirl x={120} y={260} s={1.1} />
+          <Swirl x={700} y={180} s={0.9} flip />
+        </g>
+        <g transform={`translate(${-drift},0)`}>
+          <Swirl x={430} y={420} s={0.7} />
+          <Swirl x={880} y={520} s={0.8} flip />
+        </g>
+        {/* город с куполами у горизонта */}
+        <g transform="translate(0,1800)" opacity={0.96}>
+          <rect x={-10} y={-70} width={1100} height={75} fill={C.wall} stroke="#8A5A2B" strokeWidth={3} />
+          <rect x={60} y={-150} width={150} height={80} fill={C.wall} stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={135} w={120} h={66} color={C.teal} />
+          <rect x={300} y={-130} width={110} height={60} fill="#BD9440" stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={355} w={92} h={50} color="#3E5FA0" />
+          <rect x={505} y={-160} width={170} height={90} fill={C.wall} stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={590} w={140} h={76} color={C.teal} />
+          <rect x={790} y={-128} width={100} height={58} fill="#BD9440" stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={840} w={86} h={48} color="#3E5FA0" />
+          <rect x={955} y={-148} width={26} height={78} fill={C.wall} stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={968} w={46} h={28} color={C.teal} />
+          <rect x={235} y={-120} width={22} height={50} fill={C.wall} stroke="#8A5A2B" strokeWidth={3} />
+          <Dome x={246} w={40} h={24} color="#3E5FA0" />
+        </g>
+        {/* земля и кустики */}
+        <rect x={0} y={1805} width={1080} height={115} fill="#8D97A6" />
+        <Tuft x={90} y={1878} ph={0} />
+        <Tuft x={330} y={1894} ph={30} />
+        <Tuft x={560} y={1872} ph={60} />
+        <Tuft x={780} y={1896} ph={15} />
+        <Tuft x={990} y={1880} ph={45} />
+      </svg>
+    </AbsoluteFill>
   );
 };
 
@@ -59,12 +127,12 @@ const TopBar = () => {
   const { durationInFrames } = useVideoConfig();
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 50 }}>
-      <div style={{ height: 12, background: 'rgba(31,77,58,0.12)' }}>
+      <div style={{ height: 12, background: 'rgba(242,231,206,0.28)' }}>
         <div
           style={{
             height: '100%',
             width: `${(f / durationInFrames) * 100}%`,
-            background: C.green,
+            background: C.gold,
             borderRadius: '0 6px 6px 0',
           }}
         />
@@ -78,11 +146,11 @@ const TopBar = () => {
           fontSize: 26,
           fontWeight: 800,
           letterSpacing: '0.16em',
-          color: C.muted,
+          color: 'rgba(242,231,206,0.88)',
         }}
       >
         <span>АРАБСКИЙ С НУЛЯ</span>
-        <span style={{ color: C.ochre }}>УРОК 1 · АЛФАВИТ</span>
+        <span style={{ color: C.gold }}>УРОК 1 · АЛФАВИТ</span>
       </div>
     </div>
   );
@@ -116,8 +184,9 @@ const Kicker = ({ children, at }) => {
     <div
       style={{
         transform: `scale(${s})`,
-        background: C.green,
-        color: '#fff',
+        background: C.terra,
+        color: C.cream,
+        border: `3px solid ${C.olive}`,
         borderRadius: 999,
         padding: '14px 36px',
         fontSize: 28,
@@ -139,9 +208,11 @@ const H = ({ children, at, size = 76 }) => {
       style={{
         opacity: s,
         transform: `translateY(${(1 - s) * 60}px)`,
+        fontFamily: alegreya,
         fontSize: size,
         fontWeight: 800,
-        color: C.green,
+        color: C.cream,
+        textShadow: '0 3px 18px rgba(42,42,30,0.45)',
         textAlign: 'center',
         lineHeight: 1.1,
         marginTop: 26,
@@ -162,10 +233,13 @@ const Card = ({ at, children, style }) => {
         opacity: s,
         transform: `translateY(${(1 - s) * 90}px)`,
         background: C.paper,
-        borderRadius: 32,
-        padding: '34px 44px',
+        border: `3px solid ${C.olive}`,
+        outline: '2px solid rgba(138,90,43,0.45)',
+        outlineOffset: -12,
+        borderRadius: 26,
+        padding: '36px 46px',
         width: '100%',
-        boxShadow: '0 14px 50px rgba(31,77,58,0.12)',
+        boxShadow: '0 16px 44px rgba(42,42,30,0.30)',
         ...style,
       }}
     >
@@ -196,21 +270,21 @@ const Intro = () => {
           fontFamily: amiri,
           direction: 'rtl',
           fontSize: 150,
-          color: C.green,
+          color: C.cream,
           clipPath: `inset(0 0 0 ${reveal}%)`,
           lineHeight: 1.6,
         }}
       >
         السَّلامُ عَلَيْكُم
       </div>
-      <div style={{ marginTop: 30, fontSize: 40, fontWeight: 800, color: C.ochre, minHeight: 60 }}>
+      <div style={{ marginTop: 30, fontSize: 40, fontWeight: 800, color: C.gold, minHeight: 60, textShadow: '0 2px 12px rgba(42,42,30,0.4)' }}>
         {typed('ас-саля́му але́йкум — «мир вам!»', f, 95, 22, fps)}
       </div>
       <div
         style={{
           marginTop: 'auto',
           fontSize: 30,
-          color: C.muted,
+          color: 'rgba(242,231,206,0.85)',
           opacity: interpolate(f, [130, 150], [0, 1], clamp),
         }}
       >
@@ -333,11 +407,11 @@ const LetterScene = ({ glyph, dotless, dots, grow, name, sound, note, word, word
             key={i}
             style={{
               width: i === idx ? 44 : 16, height: 16, borderRadius: 10,
-              background: i === idx ? C.ochre : 'rgba(31,77,58,0.2)',
+              background: i === idx ? C.gold : 'rgba(242,231,206,0.4)',
             }}
           />
         ))}
-        <span style={{ fontSize: 26, fontWeight: 800, color: C.muted, marginLeft: 12 }}>
+        <span style={{ fontSize: 26, fontWeight: 800, color: 'rgba(242,231,206,0.9)', marginLeft: 12 }}>
           БУКВА {idx + 1} / 4
         </span>
       </div>
@@ -440,7 +514,7 @@ const HarakatOne = ({ s, tr, nm, d }) => {
       >
         {s}
       </div>
-      <div style={{ background: C.paper, borderRadius: 28, padding: '26px 60px', textAlign: 'center', boxShadow: '0 14px 50px rgba(31,77,58,0.12)' }}>
+      <div style={{ background: C.paper, border: `3px solid ${C.olive}`, outline: '2px solid rgba(138,90,43,0.45)', outlineOffset: -12, borderRadius: 24, padding: '26px 60px', textAlign: 'center', boxShadow: '0 16px 44px rgba(42,42,30,0.30)' }}>
         <span style={{ fontSize: 46, fontWeight: 800, color: C.ochre }}>{nm}</span>
         <span style={{ fontSize: 58, fontWeight: 800, color: C.green, marginLeft: 34 }}>
           {typed(`«${tr}»`, f, 24, 12, fps)}
@@ -482,8 +556,10 @@ const Harakat = () => {
             <div
               style={{
                 display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24,
-                background: C.paper, borderRadius: 36, padding: 40,
-                boxShadow: '0 14px 50px rgba(31,77,58,0.12)',
+                background: C.paper, border: `3px solid ${C.olive}`,
+                outline: '2px solid rgba(138,90,43,0.45)', outlineOffset: -12,
+                borderRadius: 30, padding: 40,
+                boxShadow: '0 16px 44px rgba(42,42,30,0.30)',
               }}
             >
               {grid.map((g, i) => (
@@ -514,7 +590,7 @@ const WordScene = () => {
   return (
     <Shell dur={300}>
       <H at={6} size={78}>Собираем первое слово</H>
-      <div style={{ fontSize: 34, color: C.muted, marginTop: 14, opacity: slide(f, fps, 14) }}>
+      <div style={{ fontSize: 34, color: 'rgba(242,231,206,0.92)', marginTop: 14, opacity: slide(f, fps, 14), textShadow: '0 2px 10px rgba(42,42,30,0.35)' }}>
         ب + ا + ب — читаем справа налево
       </div>
       <div style={{ position: 'relative', width: '100%', height: 640, marginTop: 20 }}>
@@ -607,21 +683,21 @@ const Outro = () => {
           );
         })}
       </Card>
-      <Card at={135} style={{ marginTop: 30, textAlign: 'center', background: C.green, color: '#fff' }}>
+      <Card at={135} style={{ marginTop: 30, textAlign: 'center', background: C.green, color: C.cream, border: `3px solid ${C.gold}` }}>
         <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: '0.14em', opacity: 0.85 }}>ДАЛЬШЕ · УРОК 2</div>
         <div style={{ fontFamily: amiri, direction: 'rtl', fontSize: 120, lineHeight: 1.4 }}>ج · ح · خ</div>
         <div style={{ fontSize: 32, opacity: 0.9 }}>три новые буквы и первый значок тишины — сукун</div>
       </Card>
       <div style={{ width: '100%', marginTop: 44 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 28, fontWeight: 800, color: C.muted }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 28, fontWeight: 800, color: 'rgba(242,231,206,0.92)' }}>
           <span>прогресс курса</span>
           <span>урок 1 из 60</span>
         </div>
-        <div style={{ height: 18, background: 'rgba(31,77,58,0.15)', borderRadius: 10, marginTop: 10 }}>
-          <div style={{ height: '100%', width: `${Math.max(2.5, bar * 100)}%`, background: C.ochre, borderRadius: 10 }} />
+        <div style={{ height: 18, background: 'rgba(242,231,206,0.28)', borderRadius: 10, marginTop: 10 }}>
+          <div style={{ height: '100%', width: `${Math.max(2.5, bar * 100)}%`, background: C.gold, borderRadius: 10 }} />
         </div>
       </div>
-      <div style={{ marginTop: 'auto', fontSize: 28, color: C.muted, opacity: interpolate(f, [235, 255], [0, 1], clamp) }}>
+      <div style={{ marginTop: 'auto', fontSize: 28, color: 'rgba(242,231,206,0.9)', opacity: interpolate(f, [235, 255], [0, 1], clamp) }}>
         каждый кадр нарисован кодом · Remotion × Клауди ♥
       </div>
     </Shell>
