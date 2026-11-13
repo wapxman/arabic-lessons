@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Арабский с нуля — Урок 1 · Алфавит</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F7F3E8; --paper:#FFFFFF; --green:#1F4D3A; --olive:#6B7A4F;
+    --ochre:#C98A2D; --ink:#2A2A24; --muted:#7C7A6E; --ok:#2E7D4F; --bad:#C0392B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:'Manrope',system-ui,sans-serif; background:var(--cream); color:var(--ink);
+    overflow:hidden; height:100dvh;
+  }
+  .ar{font-family:'Amiri',serif; direction:rtl; unicode-bidi:isolate; line-height:1.35}
+
+  .deck{display:flex; height:100dvh; transition:transform .45s cubic-bezier(.22,.9,.3,1)}
+  .slide{
+    min-width:100%; height:100dvh; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    padding:56px 20px 96px; display:flex; flex-direction:column; align-items:center; gap:16px;
+  }
+  .slide::-webkit-scrollbar{display:none}
+
+  .kicker{font-size:12px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--ochre)}
+  h1{font-size:30px; font-weight:800; color:var(--green); text-align:center; line-height:1.15}
+  h2{font-size:22px; font-weight:800; color:var(--green); text-align:center}
+  .sub{color:var(--muted); font-size:14px; text-align:center; max-width:340px}
+
+  .card{
+    background:var(--paper); border-radius:20px; padding:18px 20px; width:100%; max-width:380px;
+    box-shadow:0 6px 24px rgba(31,77,58,.10);
+  }
+
+  /* ---- слайд 1 ---- */
+  .hero-ar{font-size:44px; color:var(--green); text-align:center; margin-top:8px}
+  .hero-tr{color:var(--ochre); font-weight:800; font-size:15px; text-align:center}
+  .toc{display:flex; flex-direction:column; gap:10px; margin-top:6px}
+  .toc div{display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600}
+  .toc span.n{
+    background:var(--green); color:#fff; min-width:26px; height:26px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;
+  }
+  .swipe-hint{color:var(--muted); font-size:13px; margin-top:10px; animation:nudge 1.6s infinite}
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+
+  /* ---- факты ---- */
+  .fact{display:flex; gap:12px; align-items:flex-start}
+  .fact .ico{font-size:22px}
+  .fact b{color:var(--green)}
+  .fact .ex{color:var(--muted); font-size:13px; margin-top:4px}
+  .fact .ex .ar{font-size:20px; color:var(--ink)}
+
+  /* ---- карточки букв (флип) ---- */
+  .letters{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:100%; max-width:380px}
+  .flip{perspective:900px; cursor:pointer; height:150px}
+  .flip .inner{
+    position:relative; width:100%; height:100%;
+    transition:transform .5s; transform-style:preserve-3d;
+  }
+  .flip.flipped .inner{transform:rotateY(180deg)}
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:18px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    box-shadow:0 6px 20px rgba(31,77,58,.10);
+  }
+  .face.front{background:var(--paper)}
+  .face.front .ar{font-size:62px; color:var(--green)}
+  .face.back{background:var(--green); color:#fff; transform:rotateY(180deg); padding:10px; text-align:center}
+  .face.back .nm{font-weight:800; font-size:17px}
+  .face.back .snd{font-size:13px; opacity:.9}
+  .face.back .ar{font-size:20px; color:var(--cream)}
+
+  /* ---- тренажёр огласовок ---- */
+  .big-letter{
+    font-size:110px; color:var(--green); text-align:center; line-height:1.3; min-height:150px;
+  }
+  .combo{font-size:24px; font-weight:800; color:var(--ochre); text-align:center}
+  .desc{color:var(--muted); font-size:14px; text-align:center; min-height:40px}
+  .picker{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+  .picker button{
+    border:2px solid var(--green); background:var(--paper); color:var(--green);
+    border-radius:14px; padding:10px 16px; font-size:16px; font-weight:800; cursor:pointer;
+    font-family:'Manrope',sans-serif;
+  }
+  .picker button .ar{font-size:22px}
+  .picker button.sel{background:var(--green); color:#fff}
+  .picker button.sel .ar{color:#fff}
+  .lbl{font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); text-align:center}
+
+  /* ---- квиз ---- */
+  .q{font-weight:800; font-size:16px; margin-bottom:10px}
+  .q .ar{font-size:26px; color:var(--green)}
+  .opts{display:flex; flex-direction:column; gap:8px}
+  .opts button{
+    border:2px solid #E4DFCE; background:var(--paper); border-radius:14px; padding:12px 14px;
+    font-size:16px; font-weight:600; cursor:pointer; text-align:left; color:var(--ink);
+    font-family:'Manrope',sans-serif; transition:all .15s;
+  }
+  .opts button .ar{font-size:24px}
+  .opts button.ok{border-color:var(--ok); background:#EAF6EE; color:var(--ok); font-weight:800}
+  .opts button.bad{border-color:var(--bad); background:#FBEBE8; color:var(--bad)}
+  .result{
+    display:none; text-align:center; background:var(--green); color:#fff; border-radius:20px;
+    padding:18px; width:100%; max-width:380px; font-weight:800; font-size:17px;
+  }
+  .result .small{font-weight:600; font-size:13px; opacity:.9; margin-top:6px}
+
+  /* ---- навигация ---- */
+  .dots{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:10;
+  }
+  .dots span{width:8px; height:8px; border-radius:50%; background:#D8D2BE; transition:all .3s}
+  .dots span.on{background:var(--green); width:22px; border-radius:6px}
+  .navbtns{position:fixed; bottom:18px; left:0; right:0; display:flex; justify-content:space-between; padding:0 18px; z-index:10; pointer-events:none}
+  .navbtns button{
+    pointer-events:auto; border:none; background:var(--green); color:#fff; width:52px; height:52px;
+    border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(31,77,58,.3);
+    transition:opacity .3s;
+  }
+  .navbtns button:disabled{opacity:.25; cursor:default}
+  .pagenum{
+    position:fixed; bottom:34px; left:50%; transform:translateX(-50%); color:var(--muted);
+    font-size:13px; font-weight:800; z-index:9;
+  }
+  .foot{color:var(--muted); font-size:12px; margin-top:auto; padding-top:14px; text-align:center}
+</style>
+</head>
+<body>
+
+<div class="dots" id="dots"></div>
+
+<main class="deck" id="deck">
+
+  <!-- 1. Титул -->
+  <section class="slide">
+    <div class="kicker">Арабский с нуля · Урок 1</div>
+    <h1>Алфавит:<br>первые шаги</h1>
+    <div class="hero-ar ar">السَّلامُ عَلَيْكُم</div>
+    <div class="hero-tr">ас-саля́му але́йкум — «мир вам!»</div>
+    <div class="card toc">
+      <div><span class="n">1</span> Как устроено арабское письмо</div>
+      <div><span class="n">2</span> Первые четыре буквы</div>
+      <div><span class="n">3</span> Огласовки: а · и · у</div>
+      <div><span class="n">4</span> Первые слова и мини-тест</div>
+    </div>
+    <div class="swipe-hint">листайте вправо →</div>
+    <div class="foot">Урок подготовила Клауди · 5 слайдов ≈ 7 минут</div>
+  </section>
+
+  <!-- 2. Как устроено письмо -->
+  <section class="slide">
+    <div class="kicker">Шаг 1</div>
+    <h2>Как устроено арабское письмо</h2>
+    <div class="card fact">
+      <div class="ico">⬅️</div>
+      <div><b>Пишут справа налево.</b>
+        <div class="ex">Начало строки — у правого края: <span class="ar">مرحبا</span> читается от م к ا</div>
+      </div>
+    </div>
+    <div class="card fact">
+      <div class="ico">🔤</div>
+      <div><b>28 букв, и нет заглавных.</b>
+        <div class="ex">Никаких «больших» и «маленьких» — у всех букв один регистр</div>
+      </div>
+    </div>
+    <div class="card fact">
+      <div class="ico">🔗</div>
+      <div><b>Буквы соединяются, как прописные.</b>
+        <div class="ex">Одна буква — до 4 форм: отдельно <span class="ar">ب</span>, в начале <span class="ar">بـ</span>, в середине <span class="ar">ـبـ</span>, в конце <span class="ar">ـب</span></div>
+      </div>
+    </div>
+    <div class="card fact">
+      <div class="ico">✒️</div>
+      <div><b>Записывают в основном согласные.</b>
+        <div class="ex">Краткие гласные — это значки над и под буквами (огласовки). Про них — через слайд!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Первые буквы -->
+  <section class="slide">
+    <div class="kicker">Шаг 2</div>
+    <h2>Первые четыре буквы</h2>
+    <div class="sub">Нажмите на карточку, чтобы перевернуть</div>
+    <div class="letters">
+      <div class="flip"><div class="inner">
+        <div class="face front"><span class="ar">ا</span></div>
+        <div class="face back">
+          <div class="nm">а́лиф</div>
+          <div class="snd">долгая «аа». Своего звука-согласного не имеет — тянет гласную</div>
+          <div class="ar">بَاب = бааб</div>
+        </div>
+      </div></div>
+      <div class="flip"><div class="inner">
+        <div class="face front"><span class="ar">ب</span></div>
+        <div class="face back">
+          <div class="nm">ба</div>
+          <div class="snd">звук «б». Одна точка снизу</div>
+          <div class="ar">باب — дверь</div>
+        </div>
+      </div></div>
+      <div class="flip"><div class="inner">
+        <div class="face front"><span class="ar">ت</span></div>
+        <div class="face back">
+          <div class="nm">та</div>
+          <div class="snd">звук «т». Две точки сверху</div>
+          <div class="ar">تَاج — корона</div>
+        </div>
+      </div></div>
+      <div class="flip"><div class="inner">
+        <div class="face front"><span class="ar">ث</span></div>
+        <div class="face back">
+          <div class="nm">са</div>
+          <div class="snd">межзубный «с» — как th в англ. think. Три точки сверху</div>
+          <div class="ar">ثَوْب — одежда</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="sub">Заметили? <span class="ar" style="font-size:20px">ب ت ث</span> — один «корпус», различаются только точками!</div>
+  </section>
+
+  <!-- 4. Огласовки -->
+  <section class="slide">
+    <div class="kicker">Шаг 3</div>
+    <h2>Огласовки: тренажёр</h2>
+    <div class="sub">Соберите слог: выберите букву и огласовку</div>
+    <div class="card" style="text-align:center">
+      <div class="big-letter ar" id="syll">بَ</div>
+      <div class="combo" id="combo">читается: «ба»</div>
+      <div class="desc" id="desc">фатха — чёрточка НАД буквой — даёт краткую «а»</div>
+    </div>
+    <div class="lbl">буква</div>
+    <div class="picker" id="letterPick">
+      <button data-l="ب" class="sel"><span class="ar">ب</span></button>
+      <button data-l="ت"><span class="ar">ت</span></button>
+      <button data-l="ث"><span class="ar">ث</span></button>
+    </div>
+    <div class="lbl">огласовка</div>
+    <div class="picker" id="harakaPick">
+      <button data-h="f" class="sel">фатха ·  а</button>
+      <button data-h="k">кясра ·  и</button>
+      <button data-h="d">дамма ·  у</button>
+    </div>
+  </section>
+
+  <!-- 5. Слова и квиз -->
+  <section class="slide">
+    <div class="kicker">Шаг 4</div>
+    <h2>Первые слова и мини-тест</h2>
+    <div class="card" style="text-align:center">
+      <span class="ar" style="font-size:40px; color:var(--green)">بَاب</span>
+      <div style="font-weight:800">бааб — дверь</div>
+      <div class="sub" style="max-width:none">б + долгая «аа» (алиф) + б</div>
+    </div>
+
+    <div class="card">
+      <div class="q">1. Какая из букв — звук «б»?</div>
+      <div class="opts" data-quiz="0">
+        <button data-ok="0"><span class="ar">ت</span> — две точки сверху</button>
+        <button data-ok="1"><span class="ar">ب</span> — одна точка снизу</button>
+        <button data-ok="0"><span class="ar">ث</span> — три точки сверху</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q">2. Как читается <span class="ar">تُ</span> ?</div>
+      <div class="opts" data-quiz="1">
+        <button data-ok="0">та</button>
+        <button data-ok="0">ти</button>
+        <button data-ok="1">ту</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q">3. Что значит слово <span class="ar">بَاب</span> ?</div>
+      <div class="opts" data-quiz="2">
+        <button data-ok="0">книга</button>
+        <button data-ok="1">дверь</button>
+        <button data-ok="0">дом</button>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      🎉 Урок 1 пройден — <span id="score"></span>!
+      <div class="small">В уроке 2: буквы ج · ح · خ, сукун и ваши первые фразы</div>
+    </div>
+    <div class="foot">Арабский с нуля · Урок 1 из 60 · Клауди ♥</div>
+  </section>
+
+</main>
+
+<div class="navbtns">
+  <button id="prev">‹</button>
+  <button id="next">›</button>
+</div>
+<div class="pagenum" id="pagenum">1 / 5</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var total = 5, cur = 0;
+  var dots = document.getElementById('dots');
+  for (var i = 0; i < total; i++) { var s = document.createElement('span'); dots.appendChild(s); }
+
+  function go(i){
+    cur = Math.max(0, Math.min(total - 1, i));
+    deck.style.transform = 'translateX(-' + (cur * 100) + '%)';
+    document.getElementById('prev').disabled = (cur === 0);
+    document.getElementById('next').disabled = (cur === total - 1);
+    document.getElementById('pagenum').textContent = (cur + 1) + ' / ' + total;
+    var ds = dots.children;
+    for (var j = 0; j < ds.length; j++) ds[j].className = (j === cur) ? 'on' : '';
+  }
+  document.getElementById('prev').onclick = function(){ go(cur - 1); };
+  document.getElementById('next').onclick = function(){ go(cur + 1); };
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') go(cur + 1);
+    if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+
+  // свайп (горизонтальный, не мешает вертикальному скроллу и кнопкам)
+  var x0 = null, y0 = null;
+  document.addEventListener('touchstart', function(e){
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    var dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) go(cur + 1); else go(cur - 1);
+    }
+    x0 = y0 = null;
+  }, {passive:true});
+
+  // флип-карточки
+  var flips = document.querySelectorAll('.flip');
+  for (var f = 0; f < flips.length; f++) {
+    (function(card){
+      card.addEventListener('click', function(){ card.classList.toggle('flipped'); });
+    })(flips[f]);
+  }
+
+  // тренажёр огласовок
+  var MARK = { f:'َ', k:'ِ', d:'ُ' };
+  var VOW  = { f:'а', k:'и', d:'у' };
+  var CONS = { 'ب':'б', 'ت':'т', 'ث':'с' };
+  var DESCR = {
+    f:'фатха — чёрточка НАД буквой — даёт краткую «а»',
+    k:'кясра — чёрточка ПОД буквой — даёт краткую «и»',
+    d:'дамма — завиток над буквой — даёт краткую «у»'
+  };
+  var curL = 'ب', curH = 'f';
+  function syll(){
+    document.getElementById('syll').textContent = curL + MARK[curH];
+    var note = (curL === 'ث') ? ' (межзубный, как th)' : '';
+    document.getElementById('combo').textContent = 'читается: «' + CONS[curL] + VOW[curH] + '»' + note;
+    document.getElementById('desc').textContent = DESCR[curH];
+  }
+  function bindPick(id, attr, set){
+    var box = document.getElementById(id);
+    var btns = box.querySelectorAll('button');
+    for (var b = 0; b < btns.length; b++) {
+      (function(btn){
+        btn.addEventListener('click', function(){
+          for (var k = 0; k < btns.length; k++) btns[k].classList.remove('sel');
+          btn.classList.add('sel');
+          set(btn.getAttribute(attr));
+          syll();
+        });
+      })(btns[b]);
+    }
+  }
+  bindPick('letterPick', 'data-l', function(v){ curL = v; });
+  bindPick('harakaPick', 'data-h', function(v){ curH = v; });
+  syll();
+
+  // квиз
+  var answered = {}, correct = 0, QT = 3;
+  var groups = document.querySelectorAll('.opts');
+  for (var g = 0; g < groups.length; g++) {
+    (function(grp){
+      var qid = grp.getAttribute('data-quiz');
+      var btns = grp.querySelectorAll('button');
+      for (var b = 0; b < btns.length; b++) {
+        (function(btn){
+          btn.addEventListener('click', function(){
+            if (answered[qid]) return;
+            answered[qid] = true;
+            var ok = btn.getAttribute('data-ok') === '1';
+            if (ok) { correct++; btn.classList.add('ok'); }
+            else {
+              btn.classList.add('bad');
+              for (var k = 0; k < btns.length; k++)
+                if (btns[k].getAttribute('data-ok') === '1') btns[k].classList.add('ok');
+            }
+            if (Object.keys(answered).length === QT) {
+              document.getElementById('score').textContent = correct + ' из ' + QT;
+              document.getElementById('result').style.display = 'block';
+              document.getElementById('result').scrollIntoView({behavior:'smooth', block:'nearest'});
+            }
+          });
+        })(btns[b]);
+      }
+    })(groups[g]);
+  }
+
+  go(0);
+})();
+</script>
+</body>
+</html>
